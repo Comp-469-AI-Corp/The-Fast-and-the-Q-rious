@@ -68,8 +68,10 @@ from pacman import PacmanEnv, RandomAgent, Lane, run_phase, describe_rewards, ou
 # An empty list of rewards gives 0.
 # =============================================================================
 def discounted_return(rewards, gamma):
-    # YOUR CODE HERE
-    raise NotImplementedError
+    total = 0
+    for k in range(len(rewards)):
+        total += (gamma ** k) * rewards[k]
+    return total
 
 
 # =============================================================================
