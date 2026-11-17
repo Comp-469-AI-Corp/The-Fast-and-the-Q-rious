@@ -62,8 +62,8 @@ from pacman import PacmanEnv, Lane, run_phase, finish, exact_hallway_utilities, 
 # Change only U[state].
 # =============================================================================
 def td_update(U, state, reward, next_state, alpha, gamma):
-    # YOUR CODE HERE
-    raise NotImplementedError
+    U[state] += alpha * (reward + gamma * U[next_state] - U[state])
+    return U[state]
 
 
 # =============================================================================
@@ -78,9 +78,15 @@ def td_update(U, state, reward, next_state, alpha, gamma):
 #     would that extra work pay off?
 # =============================================================================
 ANSWER_Q2 = """
-(a)
+(a) TD only uses the next square's current value to update the current square.
+In game 1 the neighbors are all 0 so the square next to the pellet gets a large utility (254.5).
+In game 2 the square before it sees the large positive utility and rises to 113.8.
+Direct utility estimation would have given every square its true value after game 1
+which is square 6 = 509.
 
-(b)
+(b) ADP has to learn a model of how moves lead to next states and rewards. This pays
+off in a random world where the model lets it update all the squares at once instead
+of one at a time.
 
 """
 

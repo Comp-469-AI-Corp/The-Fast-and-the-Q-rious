@@ -92,12 +92,27 @@ class QLearningAgent:
     #   directly: Part 5 replaces get_q_value and your code must still work there.
     # =========================================================================
     def get_value(self, state):
-        # YOUR CODE HERE
-        raise NotImplementedError
+        # get_value(s)   = max over legal a of Q(s, a)
+        legal_actions = self.legal_actions(state)
+        # 0.0 if no legal actions
+        if not legal_actions:
+            return 0
+        # If every legal Q-value is negative, V(s) is negative, not 0.
+        # Read Q-values with self.get_q_value(state, action), never self.q_values
+        return max(self.get_q_value(state, action) for action in legal_actions)
 
     def best_action(self, state):
-        # YOUR CODE HERE
-        raise NotImplementedError
+        # best_action(s) = argmax over legal a of Q(s, a)
+        legal_actions = self.legal_actions(state)
+        # None if no legal actions
+        if not legal_actions:
+            return None
+        # finds best Q value
+        max_value = self.get_value(state)
+        # collects every ation tied for best
+        best_actions = [action for action in legal_actions if self.get_q_value(state, action) == max_value]
+        # If several actions tie for best, pick one of them AT RANDOM (random.choice).
+        return random.choice(best_actions)
 
     # =========================================================================
     # Q4. ε-greedy (6 points)
@@ -107,8 +122,16 @@ class QLearningAgent:
     # are no legal actions. random.random() gives a float in [0, 1).
     # =========================================================================
     def get_action(self, state):
-        # YOUR CODE HERE
-        raise NotImplementedError
+        legal_actions = self.legal_actions(state)
+        # Return None if there are no legal actions
+        if not legal_actions:
+            return None
+        # With probability self.epsilon return a random legal action, chosen from ALL
+        # legal actions; random.random() gives a float in [0, 1)
+        if random.random() < self.epsilon:
+            return random.choice(legal_actions)
+        # otherwise return self.best_action(state)
+        return self.best_action(state)
 
     # =========================================================================
     # Q5. The Q-learning update (12 points)
@@ -120,8 +143,13 @@ class QLearningAgent:
     # when the game is over. Change only Q(state, action).
     # =========================================================================
     def update(self, state, action, next_state, reward):
-        # YOUR CODE HERE
-        raise NotImplementedError
+        # sample = r + γ · max_a' Q(s', a')
+        # max_a' Q(s', a') is exactly self.get_value(next_state), which is already 0
+        # when the game is over.
+        sample = reward + self.gamma * self.get_value(next_state)
+        # Q(s,a) ← (1 − α) · Q(s,a) + α · sample
+        # Change only Q(state, action).
+        self.q_values[(state, action)] = (1 - self.alpha) * self.get_q_value(state, action) + self.alpha * sample
 
 
 # =============================================================================
@@ -145,11 +173,21 @@ class QLearningAgent:
 #     this approach struggle on a full-size Pac-Man board?
 # =============================================================================
 ANSWER_Q6 = """
-(a)
+(a) The sequence of rewards is [r1, r2, r3, r4, r5] = [-1, -1, -1, -1, -501]. Four
+moves at -1 each then a fifth move into the ghost at -501 which adds up to -505. With
+all Q-values at 0 best_action would choose at random and Pac-Man would walk into the ghost.
 
-(b)
+(b) The parameter responsible for the gap is epsilon. During the training phase about
+one in ten moves were random and a random move can walk into a ghost. The average
+score during training which was 329.8 is below the greedy average of 500.8 because
+greedy play has epsilon = 0 and no random moves.
 
-(c)
+(c) The upper bound on the number of states is 14 squares for Pac-Man * 14 squares for the
+ghost * 2^3 pellets = 1568. Multiplying by up to 4 actions equals 6272. My Q-table has
+1077 entries which is smaller because many combinations did not happen or were never visited
+since Pac-Man and the ghost cannot share a square without ending the game. On a full-size
+Pac-Man board the number of states would be much bigger with more squares and pellets. So a
+table would be too big to fill and Pac-Man would rarely see the same state more than once.
 
 """
 
