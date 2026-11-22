@@ -175,8 +175,18 @@ def my_features(env, state, action):
 # =============================================================================
 ANSWER_Q9 = """
 (a)
+    After 500 training games, the table agent had 25,666 Q-table entries but won 0 percent of 50 evaluation games, averaging a score of about -418.9.
+    A table only learns values for state action pairs it has seen, so a new situation has no useful learned value.
+    The approximate agent uses the same four feature weights in new states, letting it recognize
+    food and ghost danger enven in unseen positions. After about 100 training games, it won 81 percent of 100 evaluation games
+    with an average score of 582.3
 
 (b)
+    My learned weightes were bias at +149.5, ghost-1-step-away at -294.2, eats-food at +381.7,
+    and closest-food at -8.8. The positive bias provides a baseline. The large negative ghost
+    weight makes nearby ghosts unattractive. The large positive food weight favors safely eating pellets.
+    The closest-food weight is negative because a larger distance means more moves, step penalties, 
+    and possible exposure to danger before reaching the food.
 
 """
 
