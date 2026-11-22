@@ -151,8 +151,16 @@ class ApproximateQAgent(QLearningAgent):
 def my_features(env, state, action):
     f = simple_features(env, state, action)
     nxt = env.next_position(state.pacman, action)
-    # YOUR CODE HERE
-    raise NotImplementedError
+
+    danger_positions = list(state.ghosts) + list(env.sleepers)
+
+    near_three = sum(
+        1 for ghost in danger_positions
+        if env.maze_distance(nxt, ghost) == 3
+    )
+
+    f["ghosts-3-steps-away"] = near_three / 10.0
+
     return f
 
 
