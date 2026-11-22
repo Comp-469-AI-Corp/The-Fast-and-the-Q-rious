@@ -111,12 +111,23 @@ class ApproximateQAgent(QLearningAgent):
         self.weights = defaultdict(float)    # feature name -> weight
 
     def get_q_value(self, state, action):
-        # YOUR CODE HERE
-        raise NotImplementedError
+        features = self.feature_fn(self.env, state, action)
+
+        return sum(
+            self.weights[name] * value
+            for name, value in features.items()
+                   
+        )
 
     def update(self, state, action, next_state, reward):
-        # YOUR CODE HERE
-        raise NotImplementedError
+        features = self.feature_fn(self.env, state, action)
+
+        delta = (
+            reward + self.gamma * self.get_value(next_state) - self.get_q_value(state, action)
+        )
+
+        for name, value in features.items():
+            self.weights[name] += self.alpha * delta * value
 
 
 # =============================================================================
@@ -140,8 +151,16 @@ class ApproximateQAgent(QLearningAgent):
 def my_features(env, state, action):
     f = simple_features(env, state, action)
     nxt = env.next_position(state.pacman, action)
-    # YOUR CODE HERE
-    raise NotImplementedError
+
+    danger_positions = list(state.ghosts) + list(env.sleepers)
+
+    near_three = sum(
+        1 for ghost in danger_positions
+        if env.maze_distance(nxt, ghost) == 3
+    )
+
+    f["ghosts-3-steps-away"] = near_three / 10.0
+
     return f
 
 
@@ -156,8 +175,18 @@ def my_features(env, state, action):
 # =============================================================================
 ANSWER_Q9 = """
 (a)
+    After 500 training games, the table agent had 25,666 Q-table entries but won 0 percent of 50 evaluation games, averaging a score of about -418.9.
+    A table only learns values for state action pairs it has seen, so a new situation has no useful learned value.
+    The approximate agent uses the same four feature weights in new states, letting it recognize
+    food and ghost danger enven in unseen positions. After about 100 training games, it won 81 percent of 100 evaluation games
+    with an average score of 582.3
 
 (b)
+    My learned weightes were bias at +149.5, ghost-1-step-away at -294.2, eats-food at +381.7,
+    and closest-food at -8.8. The positive bias provides a baseline. The large negative ghost
+    weight makes nearby ghosts unattractive. The large positive food weight favors safely eating pellets.
+    The closest-food weight is negative because a larger distance means more moves, step penalties, 
+    and possible exposure to danger before reaching the food.
 
 """
 
@@ -180,12 +209,29 @@ ANSWER_Q9 = """
 # =============================================================================
 ANSWER_Q10 = """
 (a)
+    The death report showed 14 losses out of 100 greedy games. All of the 14 games that results in losses
+    were classified as "trapped: 2 ghosts within 3 steps". The new ghosts-3-steps-away feature counts 
+    ghosts that are exactly three shortest maze steps from the square reached by the proposed action
+    divided by 10. On twoGhosts, the possible values are 0.0, 0.1, and 0.2. The feature aims to avoid
+    approaching two ghost traps.
 
 (b)
+    The baseline win rates for the seeds 0, 1, and 2 were 81%, 80%, and 80% with a mean of 80% and mean score
+    580.2. The feature gave 92%,  89%, and 86% with mean 89% and mean score of 648.1. This did imporve mean win
+    rate by 9% and mean score by 67.9, larger than the one point baseline and 6 point new agent win rate ranges across
+    the seeds.
 
 (c)
+    The learned weight for ghosts-3-steps-away on seed 2 was -9.6. Its negative sign akes sense because
+    it penalizes moves toward ghosts that may become potentially dangerous soon. The new information 
+    helped to predict trouble earlier than the original one step only ghsot feature.
 
 (d)
+    One advantage of hand designed features compared with features a deep newtork learns for itself is that
+    hand designed features can make learning gaster as it requires less data. One disadvantage
+    of hand made features is that, when making the features, certain patterns may be overlooked
+    that paly crucial roles. Unlike a deep network such as DQN where it can learn more complex features 
+    directly from raw pixels.
 
 """
 
