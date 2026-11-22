@@ -111,12 +111,23 @@ class ApproximateQAgent(QLearningAgent):
         self.weights = defaultdict(float)    # feature name -> weight
 
     def get_q_value(self, state, action):
-        # YOUR CODE HERE
-        raise NotImplementedError
+        features = self.feature_fn(self.env, state, action)
+
+        return sum(
+            self.weights[name] * value
+            for name, value in features.items()
+                   
+        )
 
     def update(self, state, action, next_state, reward):
-        # YOUR CODE HERE
-        raise NotImplementedError
+        features = self.feature_fn(self.env, state, action)
+
+        delta = (
+            reward + self.gamma * self.get_value(next_state) - self.get_q_value(state, action)
+        )
+
+        for name, value in features.items():
+            self.weights[name] += self.alpha * delta * value
 
 
 # =============================================================================
