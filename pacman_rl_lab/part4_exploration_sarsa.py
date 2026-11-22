@@ -82,12 +82,36 @@ class ExplorationQAgent(QLearningAgent):
         self.exploring = True            # switched off while the agent is evaluated
 
     def exploration_value(self, u, n):
-        # YOUR CODE HERE
-        raise NotImplementedError
+        # Make moves we haven't tried enough look worth trying
+        if n < self.n_e:
+            return self.r_plus
+        # After enough tries, use what the agent has learned
+        return u
 
     def get_action(self, state):
-        # YOUR CODE HERE
-        raise NotImplementedError
+        # During the whole processs, just pick the best move we've learned
+        if not self.exploring:
+            return self.best_action(state)
+
+        legal_actions = self.legal_actions(state)
+        # No legal moves means the game is over
+        if not legal_actions:
+            return None
+
+        # Give each move its Qvalue or the bonus if it needs more time/tries
+        exploration_values = {
+            action: self.exploration_value(
+                self.get_q_value(state, action), self.counts[(state, action)]
+            )
+            for action in legal_actions
+        }
+        max_value = max(exploration_values.values())
+        best_actions = [
+            action for action in legal_actions
+            if exploration_values[action] == max_value
+        ]
+        # Pick randomly if several moves happen to tie for the best.
+        return random.choice(best_actions)
 
     def update(self, state, action, next_state, reward):
         self.counts[(state, action)] += 1
@@ -109,11 +133,15 @@ class SarsaAgent(QLearningAgent):
         self._planned = None
 
     def sarsa_target(self, reward, next_state, next_action):
-        # YOUR CODE HERE
-        raise NotImplementedError
+        # If the game is over, only the reward matters in this situation
+        if next_action is None:
+            return reward
+        # Use the next move we're actually taking, even if it was picked randomly.
+        return reward + self.gamma * self.get_q_value(next_state, next_action)
 
     def get_action(self, state):
         if self._planned is not None and self._planned[0] == state:
+            # Take the move we already picked during the last update.
             action, self._planned = self._planned[1], None
             return action
         return super().get_action(state)
@@ -122,7 +150,9 @@ class SarsaAgent(QLearningAgent):
         next_action = QLearningAgent.get_action(self, next_state)   # ε-greedy choice of a'
         self._planned = (next_state, next_action)                   # ...which will really be played
         q = self.get_q_value(state, action)
-        self.q_values[(state, action)] = q + self.alpha * (self.sarsa_target(reward, next_state, next_action) - q)
+        # Move the old Qvalue toward the new target.
+        target = self.sarsa_target(reward, next_state, next_action)
+        self.q_values[(state, action)] = q + self.alpha * (target - q)
 
     def end_episode(self):
         self._planned = None
@@ -141,9 +171,23 @@ class SarsaAgent(QLearningAgent):
 #     the exploration function?
 # =============================================================================
 ANSWER_Q7 = """
-(a)
+(a) 
 
-(b)
+So in this run the Exploration function agents last 200 training average Was 479.6 
+Compared with 283.5 for Epsilon equaling 0.1 While also their greedy win rates were 
+close to 100% with some of them being 98 or 99 and Once the actions have had enough
+visits the optimistic bonus disappears and the agent begins to act more greedy in 
+those States Which Matching the greedy in the limit idea of glie. And the epsilon equals
+0.1 and the agent keeps making random moves during training 
+including dangerous ones but greedy evaluation turns that exploration off.
+
+(b) 
+
+For a first move with reward being -1 and all the next state qvalues still being 0,
+the update gives q(s,a) = 0 + 0.5 * (-1 + 0.9 * 0 - 0) = -0.5, 
+while an untried action is at 0. the rule for greddy  ends up choosing an untried 
+action over the tried one. so the first zeros encourage exploration through optimism.
+
 
 """
 
@@ -162,9 +206,27 @@ ANSWER_Q7 = """
 ANSWER_Q8 = """
 (a)
 
-(b)
+qlearning's greedy path went straight along the row by the sleeping ghost in 7 moves. 
+during 1000 training games, it died 177 times and scored on average 323.9 SARSA moved up a row
+and crossed the dangerous one and havd 78 deaths and an average score of 420.2.
 
-(c)
+(b) 
+
+qlearning's target uses the best Q value in the next state, so it assumes
+Pac-Man will take the best move next. SARSA's target uses the Q value of the
+move Pac picks, which can be random during training. The squares
+by the sleeping ghosts look worse to SARSA because a random move can walk
+into on, so it learns to stay farther away.
+
+
+
+(c) 
+
+I would use SARSA while the robot learns because it learns that random
+moves near the stairs can be dangerus. It had 78 deaths compared to qlearning's
+177, so it was safer during training. Once epsilon is 0, I would be okay using
+either because there are no random moves and both target rules use the best
+next move, but they could still follow different paths from what they learned.
 
 """
 
