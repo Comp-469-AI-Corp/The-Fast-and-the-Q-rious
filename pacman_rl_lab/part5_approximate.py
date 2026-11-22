@@ -209,8 +209,17 @@ ANSWER_Q9 = """
 # =============================================================================
 ANSWER_Q10 = """
 (a)
+    The death report showed 14 losses out of 100 greedy games. All of the 14 games that results in losses
+    were classified as "trapped: 2 ghosts within 3 steps". The new ghosts-3-steps-away feature counts 
+    ghosts that are exactly three shortest maze steps from the square reached by the proposed action
+    divided by 10. On twoGhosts, the possible values are 0.0, 0.1, and 0.2. The feature aims to avoid
+    approaching two ghost traps.
 
 (b)
+    The baseline win rates for the seeds 0, 1, and 2 were 81%, 80%, and 80% with a mean of 80% and mean score
+    580.2. The feature gave 92%,  89%, and 86% with mean 89% and mean score of 648.1. This did imporve mean win
+    rate by 9% and mean score by 67.9, larger than the one point baseline and 6 point new agent win rate ranges across
+    the seeds.
 
 (c)
 
