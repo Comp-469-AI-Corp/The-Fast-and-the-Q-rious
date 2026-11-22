@@ -222,8 +222,16 @@ ANSWER_Q10 = """
     the seeds.
 
 (c)
+    The learned weight for ghosts-3-steps-away on seed 2 was -9.6. Its negative sign akes sense because
+    it penalizes moves toward ghosts that may become potentially dangerous soon. The new information 
+    helped to predict trouble earlier than the original one step only ghsot feature.
 
 (d)
+    One advantage of hand designed features compared with features a deep newtork learns for itself is that
+    hand designed features can make learning gaster as it requires less data. One disadvantage
+    of hand made features is that, when making the features, certain patterns may be overlooked
+    that paly crucial roles. Unlike a deep network such as DQN where it can learn more complex features 
+    directly from raw pixels.
 
 """
 
